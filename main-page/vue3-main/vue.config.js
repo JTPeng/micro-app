@@ -1,7 +1,7 @@
 const { defineConfig } = require("@vue/cli-service");
 module.exports = defineConfig({
   outputDir: "main-vue3",
-  publicPath: "/main-vue3/",
+  publicPath: "/",
   productionSourceMap: false,
   devServer: {
     hot: false,
@@ -10,7 +10,7 @@ module.exports = defineConfig({
   // 自定义webpack配置
   configureWebpack: {
     output: {
-      jsonpFunction: `webpackJsonp-main-vue3`,
+      // jsonpFunction: `webpackJsonp-main-vue3`,
     },
   },
   chainWebpack: (config) => {
