@@ -3,8 +3,16 @@
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
   </nav>
-  <router-view/>
+  <router-view />
 </template>
+
+<script setup>
+import { onMounted } from "vue";
+
+onMounted(() => {
+  console.info("child-vue3", sessionStorage.getItem("main-tabList"));
+});
+</script>
 
 <style>
 #app {

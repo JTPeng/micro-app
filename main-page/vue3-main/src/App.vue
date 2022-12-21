@@ -33,7 +33,11 @@
     <el-container class="container-right-outer">
       <div class="container-right">
         <div class="top-menu-list">
-          <Container :menuList="menuList"></Container>
+          <Container
+            :storageMenuList="storageMenuList"
+            @tabToggleMenu="tabToggleMenu"
+            @removeTabMenu="removeTabMenu"
+          ></Container>
         </div>
         <el-header>
           <div class="toolbar">
@@ -60,9 +64,10 @@
 
 <script setup>
 import { Message, Setting } from "@element-plus/icons-vue";
-import { ref } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import Container from "./components/Container.vue";
+import { setSessionStorage } from "./utils/storage";
 const activeIndex = ref("/");
 const router = useRouter();
 const menuList = ref([
@@ -85,6 +90,15 @@ const menuList = ref([
     ],
   },
 ]);
+const storageMenuList = reactive({
+  activeMenu: "/",
+  menuArr: [
+    {
+      name: "首页",
+      path: "/",
+    },
+  ],
+});
 
 let flatMenuList = [];
 
@@ -97,17 +111,52 @@ const changeMenuList = (arr = "") => {
     !menu.children && flatMenuList.push(menu);
   });
 };
-changeMenuList();
+
+onMounted(() => {
+  changeMenuList();
+  storageTabList();
+});
 
 // 用户点击菜单时控制基座应用跳转
-const selectMenu = (index, indexPath) => {
-  console.info("selectMenu", index, indexPath);
-  storageTabList(index, indexPath);
-  index && router.push(index);
+const selectMenu = (path) => {
+  const { menuArr } = storageMenuList;
+  const target = menuArr.find((item) => item.path === path);
+  if (!target) {
+    const menu = flatMenuList.find((item) => item.path === path);
+    const list = [...storageMenuList.menuArr, menu];
+    modifyMenuList(path, list);
+  }
+  activeIndex.value = path;
+  router.push(path);
 };
 
-const storageTabList = (index, indexPath) => {
-  console.info("storageTabList", index, indexPath);
+const tabToggleMenu = (path) => {
+  activeIndex.value = path;
+  modifyMenuList(path);
+  router.push(path);
+};
+
+const removeTabMenu = (name) => {
+  let routerPath = "";
+  const list = storageMenuList.menuArr.filter((item, index) => {
+    console.info("removeTabMenu", item.path, name);
+    if (item.path === name) {
+      routerPath = storageMenuList.menuArr[index - 1].path;
+    }
+    return item.path !== name;
+  });
+  modifyMenuList(routerPath, list);
+  router.push(routerPath);
+};
+
+const storageTabList = () => {
+  setSessionStorage("tabList", JSON.stringify(storageMenuList));
+};
+
+const modifyMenuList = (path, list = storageMenuList.menuArr) => {
+  storageMenuList.activeMenu = path;
+  storageMenuList.menuArr = [...list];
+  storageTabList();
 };
 </script>
 

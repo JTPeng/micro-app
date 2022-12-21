@@ -19,6 +19,7 @@ export default {
     if (window.__MICRO_APP_ENVIRONMENT__) {
       this.toListener();
     }
+    console.info("child", sessionStorage.getItem("main-tabList"));
   },
   methods: {
     // 子应用内部跳转时，通知侧边栏改变菜单状态

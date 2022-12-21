@@ -1,14 +1,19 @@
 <template>
   <el-tabs
-    v-model="activeName"
+    v-model="storageMenuList.activeMenu"
     type="card"
     class="demo-tabs"
     @tab-click="tabClick"
+    @tab-remove="tabRemove"
   >
-    <el-tab-pane label="User" name="first"></el-tab-pane>
-    <el-tab-pane label="Config" name="second"></el-tab-pane>
-    <el-tab-pane label="Role" name="third"></el-tab-pane>
-    <el-tab-pane label="Task" name="fourth"></el-tab-pane>
+    <el-tab-pane
+      v-for="tab in storageMenuList.menuArr"
+      :label="tab.name"
+      :name="tab.path"
+      :closable="tab.path !== '/'"
+    >
+      {{ tab.name }}</el-tab-pane
+    >
   </el-tabs>
 </template>
 
@@ -19,12 +24,31 @@ export default {
 </script>
 
 <script setup>
-import { ref } from "vue";
+import { defineProps, defineEmits } from "vue";
 import { useMenuList } from "../store/useMenuList";
+const props = defineProps({
+  storageMenuList: {
+    type: Object,
+    default: () => ({
+      activeMenu: "/",
+      menuArr: [
+        {
+          name: "首页",
+          path: "/",
+        },
+      ],
+    }),
+  },
+});
+const emits = defineEmits(["tabToggleMenu", "removeTabMenu"]);
 
-const activeName = ref("/");
-const tabClick = (e) => {
-  console.info("tabClick", e);
+const tabClick = (path) => {
+  props.storageMenuList.activeMenu !== path.paneName &&
+    emits("tabToggleMenu", path.paneName);
+};
+
+const tabRemove = (name) => {
+  emits("removeTabMenu", name);
 };
 </script>
 
