@@ -13,6 +13,7 @@ export const useMenuList = defineStore("menuList", {
       this.flatMenuList = [...list];
     },
     setKeepAlive(name, bool) {
+      console.info("执行了 setKeepAlive");
       const { flatMenuList } = this;
       const list = flatMenuList.map((item) => {
         if (name === item.path) {

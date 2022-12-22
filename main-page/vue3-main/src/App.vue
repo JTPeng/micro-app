@@ -130,13 +130,15 @@ const selectMenu = (path) => {
   const { menuArr } = storageMenuList;
   const target = menuArr.find((item) => item.path === path);
   if (!target) {
+    // tab菜单不存在
     const menu = flatMenuList.find((item) => item.path === path);
     const list = [...storageMenuList.menuArr, menu];
     modifyMenuList(path, list);
+    menuList.setKeepAlive(path, true);
   } else {
+    // tab菜单存在
     modifyMenuList(path);
   }
-  menuList.setKeepAlive(path, true);
   router.push(path);
 };
 

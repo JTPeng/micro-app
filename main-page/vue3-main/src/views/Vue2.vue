@@ -1,5 +1,6 @@
 <template>
   <h1>vue2 {{ isKeepAlive }}</h1>
+  <h3>{{ menuList.flatMenuList }}</h3>
   <micro-app
     name="appname-vue2"
     :url="url"
