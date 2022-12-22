@@ -34,12 +34,16 @@ export default {
       }
     },
     toListener() {
-      console.info("toListener");
-      window.addEventListener("appstate-change", function (e) {
+      window.addEventListener("appstate-change", (e) => {
         if (e.detail.appState === "afterhidden") {
           console.log("已卸载");
         } else if (e.detail.appState === "beforeshow") {
           console.log("即将重新渲染");
+          console.info("toListener", this.$route);
+          console.info("toListener", location);
+          // 重新设置 url地址  
+          // 参考 https://cangdu.org/micro-app/docs.html#/zh-cn/keep-alive
+          location.href += `#${this.$route.path}`;
         } else if (e.detail.appState === "aftershow") {
           console.log("已经重新渲染");
         }
