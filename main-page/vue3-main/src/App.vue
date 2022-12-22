@@ -2,7 +2,7 @@
   <el-container class="layout-container-demo" style="height: 500px">
     <el-aside width="200px">
       <el-scrollbar>
-        <el-menu :default-active="activeIndex" @select="selectMenu">
+        <el-menu :default-active="storageMenuList.activeMenu" @select="selectMenu">
           <template v-for="menu in menuList" :key="menu.path">
             <el-sub-menu
               v-if="menu.children && menu.children.length > 0"
@@ -68,7 +68,7 @@ import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import Container from "./components/Container.vue";
 import { setSessionStorage } from "./utils/storage";
-const activeIndex = ref("/");
+
 const router = useRouter();
 const menuList = ref([
   {
@@ -125,13 +125,13 @@ const selectMenu = (path) => {
     const menu = flatMenuList.find((item) => item.path === path);
     const list = [...storageMenuList.menuArr, menu];
     modifyMenuList(path, list);
+  } else {
+    modifyMenuList(path);
   }
-  activeIndex.value = path;
   router.push(path);
 };
 
 const tabToggleMenu = (path) => {
-  activeIndex.value = path;
   modifyMenuList(path);
   router.push(path);
 };
@@ -153,9 +153,9 @@ const storageTabList = () => {
   setSessionStorage("tabList", JSON.stringify(storageMenuList));
 };
 
-const modifyMenuList = (path, list = storageMenuList.menuArr) => {
+const modifyMenuList = (path, list = []) => {
   storageMenuList.activeMenu = path;
-  storageMenuList.menuArr = [...list];
+  list.length > 0 && (storageMenuList.menuArr = [...list]);
   storageTabList();
 };
 </script>
