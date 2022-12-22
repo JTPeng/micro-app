@@ -2,8 +2,11 @@
   <el-container class="layout-container-demo" style="height: 500px">
     <el-aside width="200px">
       <el-scrollbar>
-        <el-menu :default-active="storageMenuList.activeMenu" @select="selectMenu">
-          <template v-for="menu in menuList" :key="menu.path">
+        <el-menu
+          :default-active="storageMenuList.activeMenu"
+          @select="selectMenu"
+        >
+          <template v-for="menu in leftMenuList" :key="menu.path">
             <el-sub-menu
               v-if="menu.children && menu.children.length > 0"
               :index="menu.path"
@@ -67,10 +70,12 @@ import { Message, Setting } from "@element-plus/icons-vue";
 import { ref, reactive, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import Container from "./components/Container.vue";
+import { useMenuList } from "./store/useMenuList";
 import { setSessionStorage } from "./utils/storage";
 
+const menuList = useMenuList();
 const router = useRouter();
-const menuList = ref([
+const leftMenuList = ref([
   {
     name: "首页",
     path: "/",
@@ -82,10 +87,12 @@ const menuList = ref([
       {
         name: "vue2",
         path: "/vue2",
+        isKeepAlive: true,
       },
       {
         name: "vue3",
         path: "/vue3",
+        isKeepAlive: true,
       },
     ],
   },
@@ -103,7 +110,7 @@ const storageMenuList = reactive({
 let flatMenuList = [];
 
 const changeMenuList = (arr = "") => {
-  const list = arr || menuList.value;
+  const list = arr || leftMenuList.value;
   list.forEach((menu) => {
     if (menu.children && menu.children.length > 0) {
       changeMenuList(menu.children);
@@ -114,6 +121,7 @@ const changeMenuList = (arr = "") => {
 
 onMounted(() => {
   changeMenuList();
+  menuList.setFlatMenuList(flatMenuList);
   storageTabList();
 });
 
@@ -128,6 +136,7 @@ const selectMenu = (path) => {
   } else {
     modifyMenuList(path);
   }
+  menuList.setKeepAlive(path, true);
   router.push(path);
 };
 
@@ -136,27 +145,28 @@ const tabToggleMenu = (path) => {
   router.push(path);
 };
 
-const removeTabMenu = (name) => {
+const removeTabMenu = (path) => {
   let routerPath = "";
   const list = storageMenuList.menuArr.filter((item, index) => {
-    console.info("removeTabMenu", item.path, name);
-    if (item.path === name) {
+    if (item.path === path) {
       routerPath = storageMenuList.menuArr[index - 1].path;
     }
-    return item.path !== name;
+    return item.path !== path;
   });
+  console.info("removeTabMenu", path);
+  menuList.setKeepAlive(path, false);
   modifyMenuList(routerPath, list);
   router.push(routerPath);
-};
-
-const storageTabList = () => {
-  setSessionStorage("tabList", JSON.stringify(storageMenuList));
 };
 
 const modifyMenuList = (path, list = []) => {
   storageMenuList.activeMenu = path;
   list.length > 0 && (storageMenuList.menuArr = [...list]);
   storageTabList();
+};
+
+const storageTabList = () => {
+  setSessionStorage("tabList", JSON.stringify(storageMenuList));
 };
 </script>
 

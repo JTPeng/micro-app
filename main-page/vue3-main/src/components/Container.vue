@@ -25,7 +25,6 @@ export default {
 
 <script setup>
 import { defineProps, defineEmits } from "vue";
-import { useMenuList } from "../store/useMenuList";
 const props = defineProps({
   storageMenuList: {
     type: Object,
