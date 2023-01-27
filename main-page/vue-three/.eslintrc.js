@@ -1,18 +1,25 @@
 module.exports = {
   root: true,
   env: {
-    node: true
+    node: true,
   },
   extends: [
-    'plugin:vue/vue3-essential',
-    '@vue/standard',
-    '@vue/typescript/recommended'
+    "plugin:vue/vue3-essential",
+    "@vue/standard",
+    "@vue/typescript/recommended",
   ],
   parserOptions: {
-    ecmaVersion: 2020
+    ecmaVersion: 2020,
+  },
+  globals: {
+    $ref: "readonly",
+    $computed: "readonly",
+    $shallowRef: "readonly",
+    $customRef: "readonly",
+    $toRef: "readonly",
   },
   rules: {
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off'
-  }
-}
+    "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
+    "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off",
+  },
+};
