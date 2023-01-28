@@ -1,128 +1,157 @@
 <template>
-  <el-radio-group v-model="isCollapse" style="margin-bottom: 20px">
-    <el-radio-button :label="false">expand</el-radio-button>
-    <el-radio-button :label="true">collapse</el-radio-button>
-  </el-radio-group>
-  <el-menu
-    default-active="/"
-    class="el-menu-vertical-demo"
-    :collapse="isCollapse"
-    @select="select"
-    @open="handleOpen"
-    @close="handleClose"
-  >
-    <el-menu-item index="/">
-      <el-icon><promotion /></el-icon>
-      <template #title>首页</template>
-    </el-menu-item>
-    <el-sub-menu index="vue-appName">
-      <template #title>
-        <el-icon><location /></el-icon>
-        <span>vue-first</span>
-      </template>
-      <el-menu-item index="appName-one">item one</el-menu-item>
-      <el-menu-item index="appName-two">item two</el-menu-item>
-      <el-menu-item index="appName-three">item three</el-menu-item>
-    </el-sub-menu>
-    <el-menu-item index="react-appName">
-      <el-icon><odometer /></el-icon>
-      <template #title>react-name</template>
-    </el-menu-item>
-    <el-menu-item index="vite-appName" disabled>
-      <el-icon><document /></el-icon>
-      <template #title>vite name</template>
-    </el-menu-item>
-    <el-menu-item index="angular-appName">
-      <el-icon><setting /></el-icon>
-      <template #title>angular name</template>
-    </el-menu-item>
-  </el-menu>
+  <el-container class="main-container">
+    <el-aside class="sidebar" :class="{ isCollapse: isCollapse }">
+      <el-scrollbar>
+        <el-menu
+          :default-active="activeIndex"
+          class="el-menu-vertical-demo"
+          :collapse="isCollapse"
+          :unique-opened="true"
+          @open="menuOpened"
+        >
+          <template v-for="menu in leftMenuList">
+            <el-sub-menu
+              v-if="menu.children && menu.children.length > 0"
+              :index="menu.key"
+            >
+              <template #title>
+                <el-icon><location /></el-icon>{{ menu.name }}
+              </template>
+              <el-menu-item
+                v-for="(childMenu, childIndex) in menu.children"
+                :key="childIndex"
+                :index="childMenu.path"
+                >{{ childMenu.name }}</el-menu-item
+              >
+            </el-sub-menu>
+            <el-menu-item v-else :index="menu.path">
+              <template #title>
+                <el-icon><promotion /></el-icon>{{ menu.name }}
+              </template>
+            </el-menu-item>
+          </template>
+        </el-menu>
+      </el-scrollbar>
+    </el-aside>
+    <el-container class="content">
+      <el-header>
+        <div class="content-collapse">
+          <el-icon @click="toggleSidebar">
+            <expand v-if="isCollapse" />
+            <fold v-else />
+          </el-icon>
+        </div>
+        <TabsMenu
+          :tabMenuLists="tabMenuLists"
+          @tabToggleMenu="tabToggleMenu"
+          @removeTabMenu="removeTabMenu"
+        ></TabsMenu>
+        <div class="toolbar">
+          <el-dropdown>
+            <el-icon style="margin-right: 8px; margin-top: 1px"
+              ><setting
+            /></el-icon>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item>View</el-dropdown-item>
+                <el-dropdown-item>Add</el-dropdown-item>
+                <el-dropdown-item>Delete</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+          <span>Tom</span>
+        </div>
+      </el-header>
+      <el-main>
+        <el-card>
+          <router-view></router-view>
+        </el-card>
+      </el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <script lang="ts" setup>
 import { $ref } from "vue/macros";
-import microApp, { getActiveApps } from "@micro-zoe/micro-app";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
+import TabsMenu from "layout/tabsMenu.vue";
+import { menuListType, menuArrType } from "./types/index";
+import { getSessionStorage, setSessionStorage } from "./utils/storage";
 import {
   Document,
   Location,
   Setting,
   Promotion,
   Odometer,
+  Expand,
+  Fold,
 } from "@element-plus/icons-vue";
-let activeIndex: string = $ref("/");
-let microAppData: any = $ref("");
-let isCollapse: boolean = $ref(false);
 
 const router = useRouter();
-getActiveIndex();
+let activeIndex: string = $ref("/");
+let isCollapse: boolean = $ref(false);
+const leftMenuList: menuArrType[] = $ref([
+  {
+    name: "首页",
+    path: "/",
+  },
+  {
+    name: "学生管理",
+    key: "studentManager",
+    path: "",
+    children: [
+      {
+        name: "学员列表",
+        path: "/about",
+        url: "",
+      },
+      {
+        name: "订单管理",
+        path: "/vue3",
+        url: "",
+      },
+      {
+        name: "课时统计",
+        path: "/vue3/about",
+        url: "",
+      },
+    ],
+  },
+]);
+console.info("leftMenuList", leftMenuList);
+let tabMenuLists: menuListType = $ref({
+  activeMenu: "/",
+  menuArr: [
+    {
+      path: "/",
+      name: "首页",
+    },
+  ],
+});
 // 监听浏览器前进后退按钮，激活对应菜单
+
 window.addEventListener("popstate", () => getActiveIndex());
-console.info(
-  "window.__MICRO_APP_ENVIRONMENT__",
-  (window as any).__MICRO_APP_ENVIRONMENT__
-);
-// 判断微前端环境
-if ((window as any).__MICRO_APP_ENVIRONMENT__) {
-  // 获取基座下发的数据
-  microAppData = (window as any).microApp
-    .getData()(
-      // 全局数据监听，监听来自其它子应用页面跳转，控制侧边栏的菜单展示
-      // 因为子应用之间无法直接通信，这里采用全局数据通信
-      window as any
-    )
-    .microApp.addGlobalDataListener((data: any) => {
-      console.log("全局数据:", data);
-      getActiveIndex();
-    });
-}
-// 用户点击菜单时控制基座应用跳转
-function select(index: string, indexPath: string) {
-  console.info("select", index, indexPath);
-  if (microAppData) {
-    // 因为 child-vite 和 child-react17 子应用是hash路由，所以需要传递hash值
-    let hash = null;
-    if (index === "/app-vite/page2" || index === "/app-react17/page2") {
-      const pathArr = index.split("/");
-      index = "/" + pathArr[1];
-      hash = "/" + pathArr[2];
+// 扁平化菜单 便于后续查找
+let flatMenuList: menuArrType[] = [];
+function changeMenuList(arr: menuArrType[], key: string = "") {
+  const list: menuArrType[] = arr;
+  list.forEach((menu) => {
+    if (menu.children && menu.children.length > 0) {
+      changeMenuList(menu.children, menu.key);
     }
-    // 获取子应用appName
-    const appName = indexPath[0];
-    console.info("select", index, indexPath);
-    // 控制基座跳转页面，并渲染子应用
-    pushState(appName, index, hash);
-  }
+    !menu.children && flatMenuList.push({ ...menu, key });
+  });
+  console.info("flatMenuList", flatMenuList);
+}
+changeMenuList(leftMenuList);
+// 获取存储的tab菜单数据
+function getStorageMenuList() {
+  const res: string = getSessionStorage("menuList") || "";
+  console.info("getStorageMenuList", res);
+  res && (tabMenuLists = JSON.parse(res));
+  getActiveIndex();
 }
 
-function pushState(appName: string, path: string, hash: string | null) {
-  /**
-   * 当子应用还未渲染，通过基座控制路由跳转，子应用在初始化时会自己根据url渲染对应的页面
-   * 当子应用已经渲染，则直接控制子应用进行内部跳转
-   *
-   * getActiveApps: 用于获取正在运行的子应用
-   */
-  // 子应用未渲染
-  if (!getActiveApps().includes(appName)) {
-    // child-vite 和 child-react17子应用为hash路由，这里拼接一下hash值
-    hash && (path += `/#${hash}`);
-    // 主应用跳转
-    router.push(path);
-  } else {
-    // 子应用已渲染 主应用下发路由地址，让子应用自己跳转
-    let childPath = null;
-    // child-vite 和 child-react17子应用是hash路由，hash值就是它的页面地址，这里单独处理
-    if (hash) {
-      childPath = hash;
-    } else {
-      // path的值形式如：/app-vue2/page2，这里/app-vue2是子应用的基础路由，/page2才是页面地址，所以我们需要将/app-vue2部分删除
-      childPath = path.replace(/^\/app-[^/]+/, "");
-      !childPath && (childPath = "/"); // 防止地址为空
-    }
-    // 主应用通过下发data数据控制子应用跳转
-    microApp.setData(appName, { path: childPath });
-  }
-}
 // 根据url地址获取选中菜单
 function getActiveIndex() {
   // location.pathname的值通常为：/main-angular11/app-vue2/page2，我们只取`/app-vue2/page2`
@@ -149,50 +178,125 @@ function getActiveIndex() {
   return activeIndex;
 }
 
-const handleOpen = (key: string, keyPath: string[]) => {
-  console.log("handleOpen", key, keyPath);
+getStorageMenuList();
+
+// 用户点击菜单时控制基座应用跳转
+function selectMenu(path: string, indexPath: string[]) {
+  console.info("selectMenu", path, indexPath);
+  const { menuArr } = tabMenuLists;
+  const target = menuArr.find((item) => item.path === path);
+  // 菜单不存在
+  if (!target) {
+    const currentMenu: any = flatMenuList.find((item) => item.path === path);
+    const list: menuArrType[] = [...tabMenuLists.menuArr, currentMenu];
+    modifyMenuList(path, list);
+  } else {
+    // tab菜单存在
+    modifyMenuList(path, []);
+  }
+  // 路由跳转
+  // router.push(path);
+}
+
+/**
+ * 打开菜单
+ * @param key 当前菜单的index
+ * @param keyPath 当前菜单的index数组
+ */
+const menuOpened = (key: string, keyPath: string[]) => {
+  const target = leftMenuList.find((item) => item.key === key);
+  let name: string = key;
+  let nameArr: string[] = keyPath;
+  if (target) {
+    const { children } = target;
+    name = (children as Array<menuArrType>)[0].path;
+    nameArr = [(children as Array<menuArrType>)[0].path];
+  }
+  selectMenu(name, nameArr);
+  console.log("menuOpened", name, nameArr);
 };
-const handleClose = (key: string, keyPath: string[]) => {
-  console.log("handleClose", key, keyPath);
+
+const modifyMenuList = (path: string, list: menuArrType[]) => {
+  tabMenuLists.activeMenu = path;
+  activeIndex = path;
+  list.length > 0 && (tabMenuLists.menuArr = [...list]);
+  storageTabList();
+};
+
+const storageTabList = () => {
+  setSessionStorage("menuList", JSON.stringify(tabMenuLists));
+};
+
+const toggleSidebar = () => {
+  isCollapse = !isCollapse;
+};
+
+/**
+ * tab切换菜单
+ * @param path route地址
+ */
+const tabToggleMenu = (path: string) => {
+  modifyMenuList(path, []);
+  // router.push(path);
+};
+
+const removeTabMenu = (path: string) => {
+  let routerPath: string = "";
+  const list = tabMenuLists.menuArr.filter((item, index) => {
+    if (item.path === path) {
+      routerPath = tabMenuLists.menuArr[index - 1].path;
+    }
+    return item.path !== path;
+  });
+  console.info("removeTabMenu", path);
+  modifyMenuList(routerPath, list);
+  // router.push(routerPath);
 };
 </script>
 
-<style>
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-  width: 200px;
-  min-height: 400px;
-}
-#sidebar-app {
-  font-family: Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  display: inline-block;
-  margin-right: 40px;
-  border-right: 1px solid rgb(230, 230, 230);
-}
-
-h4 {
-  font-weight: revert;
-}
-
-.el-menu-item {
-  font-size: 16px;
-}
-
-.el-menu {
-  width: 200px;
-  border-right: none;
-}
-
-.submenu-text {
-  font-size: 16px;
-  user-select: none;
-}
-
-.menu-item-text {
-  font-size: 14px;
-  user-select: none;
+<style lang="scss" scoped>
+.main-container {
+  display: flex;
+  & .sidebar {
+    width: 200px;
+    &.isCollapse {
+      width: 60px;
+    }
+  }
+  & .content {
+    & .el-header {
+      display: flex;
+      align-items: center;
+      height: auto;
+      padding: 10px 20px 0px;
+      & .content-collapse {
+        vertical-align: middle;
+        & > .el-icon {
+          font-size: 24px;
+        }
+      }
+    }
+    & .el-main {
+      background: #eee;
+    }
+  }
+  & .el-menu-vertical-demo:not(.el-menu--collapse) {
+    width: 200px;
+    height: 100vh;
+  }
+  & h4 {
+    font-weight: revert;
+  }
+  & .el-menu-item {
+    font-size: 16px;
+  }
+  & .el-menu {
+    width: 200px;
+    border-right: none;
+  }
+  & .menu-item-text {
+    font-size: 14px;
+    user-select: none;
+  }
 }
 </style>

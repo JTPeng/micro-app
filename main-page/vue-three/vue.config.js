@@ -2,23 +2,28 @@ const { defineConfig } = require("@vue/cli-service");
 module.exports = defineConfig({
   transpileDependencies: true,
   outputDir: "main-vue3",
-  publicPath: "/main-vue3/",
+  publicPath: "/",
   productionSourceMap: false,
   devServer: {
     hot: false,
-    // disableHostCheck: true,
     port: 3000,
-    open: true,
-    // overlay: {
-    //   warnings: false,
-    //   errors: true,
-    // },
+    // open: true,
   },
   lintOnSave: false,
   // 自定义webpack配置
   configureWebpack: {
     output: {
       // jsonpFunction: `webpackJsonp-main-vue3`,
+    },
+    resolve: {
+      extensions: [],
+      alias: {
+        assets: "@/assets",
+        utils: "@/utils",
+        components: "@/components",
+        layout: "@/layout",
+        types: "@/types",
+      },
     },
   },
   chainWebpack: (config) => {
