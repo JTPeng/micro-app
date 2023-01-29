@@ -13,7 +13,8 @@
         :index="menu.key"
       >
         <template #title>
-          <el-icon><location /></el-icon>{{ menu.name }}
+          <el-icon><location /></el-icon>
+          <span>{{ menu.name }}</span>
         </template>
         <el-menu-item
           v-for="(childMenu, childIndex) in menu.children"
@@ -23,9 +24,8 @@
         >
       </el-sub-menu>
       <el-menu-item v-else :index="menu.path">
-        <template #title>
-          <el-icon><promotion /></el-icon>{{ menu.name }}
-        </template>
+        <el-icon><promotion /></el-icon>
+        <template #title>{{ menu.name }}</template>
       </el-menu-item>
     </template>
   </el-menu>
@@ -62,4 +62,26 @@ const select = (key: string, keyPath: string[]) => {
 };
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+.el-menu-vertical-demo:not(.el-menu--collapse) {
+  width: 200px;
+  height: 100vh;
+  border-right: none;
+}
+.el-menu-vertical-demo {
+  & h4 {
+    font-weight: revert;
+  }
+  & .el-menu-item {
+    font-size: 16px;
+  }
+  & .el-menu {
+    width: 200px;
+    border-right: none;
+  }
+  & .menu-item-text {
+    font-size: 14px;
+    user-select: none;
+  }
+}
+</style>

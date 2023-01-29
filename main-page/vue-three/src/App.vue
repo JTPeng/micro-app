@@ -278,23 +278,5 @@ const removeTabMenu = (path: string) => {
       }
     }
   }
-  & .el-menu-vertical-demo:not(.el-menu--collapse) {
-    width: 200px;
-    height: 100vh;
-  }
-  & h4 {
-    font-weight: revert;
-  }
-  & .el-menu-item {
-    font-size: 16px;
-  }
-  & .el-menu {
-    width: 200px;
-    border-right: none;
-  }
-  & .menu-item-text {
-    font-size: 14px;
-    user-select: none;
-  }
 }
 </style>
