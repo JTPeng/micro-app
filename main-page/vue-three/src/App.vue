@@ -2,35 +2,13 @@
   <el-container class="main-container">
     <el-aside class="sidebar" :class="{ isCollapse: isCollapse }">
       <el-scrollbar>
-        <el-menu
-          :default-active="activeIndex"
-          class="el-menu-vertical-demo"
-          :collapse="isCollapse"
-          :unique-opened="true"
-          @open="menuOpened"
-        >
-          <template v-for="menu in leftMenuList">
-            <el-sub-menu
-              v-if="menu.children && menu.children.length > 0"
-              :index="menu.key"
-            >
-              <template #title>
-                <el-icon><location /></el-icon>{{ menu.name }}
-              </template>
-              <el-menu-item
-                v-for="(childMenu, childIndex) in menu.children"
-                :key="childIndex"
-                :index="childMenu.path"
-                >{{ childMenu.name }}</el-menu-item
-              >
-            </el-sub-menu>
-            <el-menu-item v-else :index="menu.path">
-              <template #title>
-                <el-icon><promotion /></el-icon>{{ menu.name }}
-              </template>
-            </el-menu-item>
-          </template>
-        </el-menu>
+        <Sidebar
+          :activeIndex="activeIndex"
+          :leftMenuList="leftMenuList"
+          :isCollapse="isCollapse"
+          @menuOpened="menuOpened"
+          @activeMenu="activeMenu"
+        ></Sidebar>
       </el-scrollbar>
     </el-aside>
     <el-container class="content">
@@ -75,17 +53,10 @@
 import { $ref } from "vue/macros";
 import { useRouter } from "vue-router";
 import TabsMenu from "layout/tabsMenu.vue";
+import Sidebar from "layout/sidebar.vue";
 import { menuListType, menuArrType } from "./types/index";
 import { getSessionStorage, setSessionStorage } from "./utils/storage";
-import {
-  Document,
-  Location,
-  Setting,
-  Promotion,
-  Odometer,
-  Expand,
-  Fold,
-} from "@element-plus/icons-vue";
+import { Setting, Expand, Fold } from "@element-plus/icons-vue";
 
 const router = useRouter();
 let activeIndex: string = $ref("/");
@@ -113,6 +84,28 @@ const leftMenuList: menuArrType[] = $ref([
       {
         name: "课时统计",
         path: "/vue3/about",
+        url: "",
+      },
+    ],
+  },
+  {
+    name: "财务管理",
+    key: "financeManager",
+    path: "",
+    children: [
+      {
+        name: "数据导出",
+        path: "/dataExport",
+        url: "",
+      },
+      {
+        name: "缴费审批",
+        path: "/approve",
+        url: "",
+      },
+      {
+        name: "退费审批",
+        path: "/returnMoney",
         url: "",
       },
     ],
@@ -181,8 +174,8 @@ function getActiveIndex() {
 getStorageMenuList();
 
 // 用户点击菜单时控制基座应用跳转
-function selectMenu(path: string, indexPath: string[]) {
-  console.info("selectMenu", path, indexPath);
+function activeMenu(path: string) {
+  console.info("activeMenu", path);
   const { menuArr } = tabMenuLists;
   const target = menuArr.find((item) => item.path === path);
   // 菜单不存在
@@ -195,7 +188,7 @@ function selectMenu(path: string, indexPath: string[]) {
     modifyMenuList(path, []);
   }
   // 路由跳转
-  // router.push(path);
+  router.push(path);
 }
 
 /**
@@ -203,17 +196,15 @@ function selectMenu(path: string, indexPath: string[]) {
  * @param key 当前菜单的index
  * @param keyPath 当前菜单的index数组
  */
-const menuOpened = (key: string, keyPath: string[]) => {
+const menuOpened = (key: string) => {
   const target = leftMenuList.find((item) => item.key === key);
   let name: string = key;
-  let nameArr: string[] = keyPath;
   if (target) {
     const { children } = target;
     name = (children as Array<menuArrType>)[0].path;
-    nameArr = [(children as Array<menuArrType>)[0].path];
   }
-  selectMenu(name, nameArr);
-  console.log("menuOpened", name, nameArr);
+  activeMenu(name);
+  console.log("menuOpened", name);
 };
 
 const modifyMenuList = (path: string, list: menuArrType[]) => {
@@ -237,7 +228,7 @@ const toggleSidebar = () => {
  */
 const tabToggleMenu = (path: string) => {
   modifyMenuList(path, []);
-  // router.push(path);
+  router.push(path);
 };
 
 const removeTabMenu = (path: string) => {
@@ -250,11 +241,11 @@ const removeTabMenu = (path: string) => {
   });
   console.info("removeTabMenu", path);
   modifyMenuList(routerPath, list);
-  // router.push(routerPath);
+  router.push(routerPath);
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="postcss" scoped>
 .main-container {
   display: flex;
   & .sidebar {
@@ -278,6 +269,13 @@ const removeTabMenu = (path: string) => {
     }
     & .el-main {
       background: #eee;
+      & > .el-card {
+        height: calc(100vh - 104px);
+        & >>> .el-card__body {
+          padding: 0;
+          height: 100%;
+        }
+      }
     }
   }
   & .el-menu-vertical-demo:not(.el-menu--collapse) {

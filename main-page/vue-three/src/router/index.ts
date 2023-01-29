@@ -21,6 +21,13 @@ const routes: Array<RouteRecordRaw> = [
     name: "appName-one",
     component: () => import(/* webpackChunkName: 'vue2' */ "../pages/vue2.vue"),
   },
+  // 匹配  不符合路由规则的路径
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
+    component: () =>
+      import(/* webpackChunkName: 'notFound' */ "../pages/notFound.vue"),
+  },
 ];
 
 const router = createRouter({

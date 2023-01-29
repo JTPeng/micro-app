@@ -16,14 +16,9 @@
   </el-tabs>
 </template>
 
-<script lang="ts">
-export default {
-  name: "tabsMenu",
-};
-</script>
-
-<script lang="ts" setup>
+<script lang="ts" name="tabsMenu" setup>
 import { defineProps, defineEmits, PropType } from "vue";
+import type { TabsPaneContext } from "element-plus";
 import { menuListType } from "../types/index";
 const props = defineProps({
   tabMenuLists: {
@@ -42,15 +37,15 @@ const props = defineProps({
 
 const emits = defineEmits(["tabToggleMenu", "removeTabMenu"]);
 
-const tabClick = (path: object) => {
-  console.info("tabClick", path);
-  // props.tabMenuLists.activeMenu !== path.paneName &&
-  //   emits("tabToggleMenu", path.paneName);
+const tabClick = (tab: TabsPaneContext, event: Event) => {
+  console.info("tabClick", tab.paneName, event);
+  props.tabMenuLists.activeMenu !== tab.paneName &&
+    emits("tabToggleMenu", tab.paneName);
 };
 
 const tabRemove = (name: string) => {
   console.info("tabRemove", name);
-  // emits("removeTabMenu", name);
+  emits("removeTabMenu", name);
 };
 </script>
 
@@ -59,6 +54,7 @@ const tabRemove = (name: string) => {
   flex: auto;
   --el-tabs-header-height: 36px;
   padding: 0 10px;
+  max-width: calc(100% - 250px);
   & >>> .el-tabs__header {
     border-bottom: none;
     & .el-tabs__nav {
