@@ -7,7 +7,8 @@
     @tab-remove="tabRemove"
   >
     <el-tab-pane
-      v-for="tab in tabMenuLists.menuArr"
+      v-for="(tab, index) in tabMenuLists.menuArr"
+      :key="index"
       :label="tab.name"
       :name="tab.path"
       :closable="tab.path !== '/'"
@@ -17,36 +18,38 @@
 </template>
 
 <script lang="ts" name="tabsMenu" setup>
-import { defineProps, defineEmits, PropType } from "vue";
-import type { TabsPaneContext } from "element-plus";
-import { menuListType } from "../types/index";
+import { defineProps, defineEmits, PropType } from 'vue'
+import type { TabsPaneContext } from 'element-plus'
+import { menuListType } from '../types/index'
+import { $ref } from 'vue/macros'
 const props = defineProps({
   tabMenuLists: {
     type: Object as PropType<menuListType>,
     default: () => ({
-      activeMnu: "/",
+      activeMnu: '/',
       menuArr: [
         {
-          name: "首页",
-          path: "/",
-        },
-      ],
-    }),
-  },
-});
+          name: '首页',
+          path: '/'
+        }
+      ]
+    })
+  }
+})
 
-const emits = defineEmits(["tabToggleMenu", "removeTabMenu"]);
+const tabMenuLists: menuListType = $ref(props.tabMenuLists)
+
+const emits = defineEmits(['tabToggleMenu', 'removeTabMenu'])
 
 const tabClick = (tab: TabsPaneContext, event: Event) => {
-  console.info("tabClick", tab.paneName, event);
-  props.tabMenuLists.activeMenu !== tab.paneName &&
-    emits("tabToggleMenu", tab.paneName);
-};
+  console.info('tabClick', tab.paneName, event)
+  tabMenuLists.activeMenu !== tab.paneName && emits('tabToggleMenu', tab.paneName)
+}
 
 const tabRemove = (name: string) => {
-  console.info("tabRemove", name);
-  emits("removeTabMenu", name);
-};
+  console.info('tabRemove', name)
+  emits('removeTabMenu', name)
+}
 </script>
 
 <style lang="postcss" scoped>

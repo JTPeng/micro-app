@@ -7,13 +7,10 @@
     @open="menuOpened"
     @select="select"
   >
-    <template v-for="menu in leftMenuList">
-      <el-sub-menu
-        v-if="menu.children && menu.children.length > 0"
-        :index="menu.key"
-      >
+    <template v-for="(menu, menuIndex) in leftMenuList" :key="menuIndex">
+      <el-sub-menu v-if="menu.children && menu.children.length > 0" :index="menu.key">
         <template #title>
-          <el-icon><location /></el-icon>
+          <el-icon><Location /></el-icon>
           <span>{{ menu.name }}</span>
         </template>
         <el-menu-item
@@ -24,7 +21,7 @@
         >
       </el-sub-menu>
       <el-menu-item v-else :index="menu.path">
-        <el-icon><promotion /></el-icon>
+        <el-icon><Promotion /></el-icon>
         <template #title>{{ menu.name }}</template>
       </el-menu-item>
     </template>
@@ -32,34 +29,34 @@
 </template>
 
 <script lang="ts" setup name="sidebar">
-import { defineProps, defineEmits, PropType } from "vue";
-import { menuArrType } from "../types/index";
-import { Location, Promotion } from "@element-plus/icons-vue";
+import { defineProps, defineEmits, PropType } from 'vue'
+import { menuArrType } from '../types/index'
+import { Location, Promotion } from '@element-plus/icons-vue'
 
-const props = defineProps({
+defineProps({
   activeIndex: {
     type: String,
-    default: "/",
+    default: '/'
   },
   isCollapse: {
     type: Boolean,
-    default: false,
+    default: false
   },
   leftMenuList: {
-    type: Array as PropType<menuArrType[]>,
-  },
-});
+    type: Array as PropType<menuArrType[]>
+  }
+})
 
-const emits = defineEmits(["menuOpened", "activeMenu"]);
+const emits = defineEmits(['menuOpened', 'activeMenu'])
 
 const menuOpened = (key: string, keyPath: string[]) => {
-  console.info("menuOpened", key, keyPath);
+  console.info('menuOpened', key, keyPath)
   // emits("menuOpened", key);
-};
+}
 const select = (key: string, keyPath: string[]) => {
-  console.info("select", key, keyPath);
-  emits("activeMenu", key);
-};
+  console.info('select', key, keyPath)
+  emits('activeMenu', key)
+}
 </script>
 
 <style lang="scss" scoped>

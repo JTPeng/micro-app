@@ -1,1 +1,1 @@
-export const STORAGE_BASE: string = "main";
+export const STORAGE_BASE = 'main'
