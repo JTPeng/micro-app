@@ -54,7 +54,7 @@ const tabRemove = (name: string) => {
   flex: auto;
   --el-tabs-header-height: 36px;
   padding: 0 10px;
-  max-width: calc(100% - 250px);
+  max-width: calc(100% - 100px);
   & >>> .el-tabs__header {
     border-bottom: none;
     & .el-tabs__nav {

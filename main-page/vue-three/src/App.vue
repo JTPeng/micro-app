@@ -78,12 +78,12 @@ const leftMenuList: menuArrType[] = $ref([
       },
       {
         name: "订单管理",
-        path: "/vue3",
+        path: "/order",
         url: "",
       },
       {
         name: "课时统计",
-        path: "/vue3/about",
+        path: "/time",
         url: "",
       },
     ],
@@ -125,8 +125,8 @@ let tabMenuLists: menuListType = $ref({
 
 window.addEventListener("popstate", () => getActiveIndex());
 // 扁平化菜单 便于后续查找
-let flatMenuList: menuArrType[] = [];
-function changeMenuList(arr: menuArrType[], key: string = "") {
+const flatMenuList: menuArrType[] = [];
+function changeMenuList(arr: menuArrType[], key = "") {
   const list: menuArrType[] = arr;
   list.forEach((menu) => {
     if (menu.children && menu.children.length > 0) {
@@ -232,14 +232,16 @@ const tabToggleMenu = (path: string) => {
 };
 
 const removeTabMenu = (path: string) => {
-  let routerPath: string = "";
-  const list = tabMenuLists.menuArr.filter((item, index) => {
+  let routerPath = "";
+  const menuArr = tabMenuLists.menuArr;
+  const list = menuArr.filter((item, index) => {
     if (item.path === path) {
-      routerPath = tabMenuLists.menuArr[index - 1].path;
+      const targetIndex = index !== menuArr.length - 1 ? index + 1 : index - 1;
+      routerPath = menuArr[targetIndex].path;
     }
     return item.path !== path;
   });
-  console.info("removeTabMenu", path);
+  console.info("removeTabMenu", path, routerPath);
   modifyMenuList(routerPath, list);
   router.push(routerPath);
 };
