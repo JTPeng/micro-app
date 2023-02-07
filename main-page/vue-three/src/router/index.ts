@@ -20,6 +20,16 @@ const routes: Array<RouteRecordRaw> = [
     name: 'appName-one',
     component: () => import(/* webpackChunkName: 'vue2' */ '../pages/vue2.vue')
   },
+  {
+    path: '/studentList/:page*',
+    name: 'studentList',
+    component: () => import(/* webpackChunkName: 'studentList' */ '../pages/studentList.vue')
+  },
+  {
+    path: '/otherList/:page*',
+    name: 'otherList',
+    component: () => import(/* webpackChunkName: 'otherList' */ '../pages/otherList.vue')
+  },
   // 匹配  不符合路由规则的路径
   {
     path: '/:pathMatch(.*)*',

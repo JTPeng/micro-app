@@ -40,7 +40,11 @@
       </el-header>
       <el-main>
         <el-card>
-          <router-view></router-view>
+          <router-view v-slot="{ Component }">
+            <keep-alive>
+              <component :is="Component"></component>
+            </keep-alive>
+          </router-view>
         </el-card>
       </el-main>
     </el-container>
@@ -55,11 +59,12 @@ import LeftSidebar from 'layout/leftSidebar.vue'
 import { menuListType, menuArrType } from './types/index'
 import { getSessionStorage, setSessionStorage } from './utils/storage'
 import { Setting, Expand, Fold } from '@element-plus/icons-vue'
+import microApp from '@micro-zoe/micro-app'
 
 const router = useRouter()
-let activeIndex: string = $ref('/')
-let isCollapse: boolean = $ref(false)
-const leftMenuList: menuArrType[] = $ref([
+let activeIndex = $ref<string>('/')
+let isCollapse = $ref<boolean>(false)
+const leftMenuList = $ref<menuArrType[]>([
   {
     name: '首页',
     path: '/'
@@ -71,12 +76,12 @@ const leftMenuList: menuArrType[] = $ref([
     children: [
       {
         name: '学员列表',
-        path: '/about',
+        path: '/studentList',
         url: ''
       },
       {
         name: '订单管理',
-        path: '/order',
+        path: '/otherList',
         url: ''
       },
       {
@@ -110,7 +115,7 @@ const leftMenuList: menuArrType[] = $ref([
   }
 ])
 console.info('leftMenuList', leftMenuList)
-let tabMenuLists: menuListType = $ref({
+let tabMenuLists = $ref<menuListType>({
   activeMenu: '/',
   menuArr: [
     {
@@ -184,6 +189,7 @@ function activeMenu(path: string) {
   }
   // 路由跳转
   router.push(path)
+  microApp.setData('vue2', { path: '/other' })
 }
 
 /**
